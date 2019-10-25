@@ -1,7 +1,23 @@
+apply plugin: 'com.novoda.bintray-release'
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: "org.jetbrains.kotlin.kapt"
+
+publish {
+
+    def groupProjectID = 'io.getsmooth.kt.android'
+    def artifactProjectID = 'system_ui.lifecycle'
+    def publishVersionID = '1.0.0'
+
+    userOrg = 'smooth'
+    repoName = 'Smooth'
+    groupId = groupProjectID
+    artifactId = artifactProjectID
+    publishVersion = publishVersionID
+    desc = 'Hassle free dealing with Android System UIs (Status bar, Navigation bar, Action bar) With Automated lifecycle managment for Fragments and Activies, and automated handling of configuration changes.'
+    website = 'https://github.com/smooth-io/smooth-system-ui'
+}
 
 android {
     compileSdkVersion 29
