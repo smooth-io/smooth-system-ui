@@ -27,10 +27,12 @@ class Fragment3 : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-//        activity?.apply {
-//            (this as AppCompatActivity).setSupportActionBar(toolbar)
-//        }
-        fullScreenAuto {}
+        activity?.apply {
+            (this as AppCompatActivity).setSupportActionBar(toolbar)
+        }
+        immersiveAuto {
+            sticky()
+        }
     }
 
 

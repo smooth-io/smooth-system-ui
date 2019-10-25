@@ -14,33 +14,36 @@
  * limitations under the License.
  */
 
-package io.getsmooth.kt.android.system_ui
+package io.getsmooth.kt.android.system_ui.helper
 
 import android.annotation.TargetApi
 import android.app.Activity
 import android.os.Build
+import android.os.Handler
 import android.view.View
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 internal open class SystemUiHelperImplICS(
+    handler: Handler,
     activity: Activity,
     view: View,
     level: Int, flags: Int,
-    syncActionBar: Boolean,
-    keepLayout: Boolean
-) : SystemUiHelperImplHC(activity, view, level, flags, syncActionBar, keepLayout) {
+    showActionBar: Boolean,
+    keepLayout: Boolean,
+    autoDelay: Long
+) : SystemUiHelperImplHC(handler,activity, view, level, flags, showActionBar, keepLayout,autoDelay) {
 
-    override fun createShowFlags(): Int = 0
+    override fun createDisableFlags(): Int = 0
 
-    override fun createTestFlags(): Int {
-        return if (level >= SystemUiHelper.LEVEL_LEAN_BACK) {
-            // Intentionally override test flags.
+    // Intentionally override test flags.
+    override fun createVisibilityTestFlags(): Int =
+        if (level >= SystemUiHelper.LEVEL_LEAN_BACK) {
             View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
         } else View.SYSTEM_UI_FLAG_LOW_PROFILE
-    }
 
-    override fun createHideFlags(): Int {
-        if (level == 0) return 0
+
+    override fun createEnableFlags(): Int {
+        if (level <= SystemUiHelper.LEVEL_NORMAL) return 0
         var flag = View.SYSTEM_UI_FLAG_LOW_PROFILE
 
         if (level >= SystemUiHelper.LEVEL_LEAN_BACK) {
@@ -49,5 +52,6 @@ internal open class SystemUiHelperImplICS(
 
         return flag
     }
+
 }
 

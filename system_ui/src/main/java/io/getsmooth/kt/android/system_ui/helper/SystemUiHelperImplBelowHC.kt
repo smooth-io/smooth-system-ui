@@ -1,6 +1,7 @@
-package io.getsmooth.kt.android.system_ui
+package io.getsmooth.kt.android.system_ui.helper
 
 import android.app.Activity
+import android.os.Handler
 import android.view.View
 import android.view.WindowManager
 
@@ -8,12 +9,14 @@ import android.view.WindowManager
  * Base implementation. Used on API level 10 and below.
  */
 class SystemUiHelperImplBelowHC(
+    handler: Handler,
     activity: Activity,
     view: View,
     level: Int, flags: Int,
-    syncActionBar: Boolean,
-    keepLayout: Boolean
-) : SystemUiHelperImpl(activity, view, level, flags, syncActionBar, keepLayout) {
+    showActionBar: Boolean,
+    keepLayout: Boolean,
+    autoDelay: Long
+) : SystemUiHelperBaseImpl(handler,activity, view, level, flags, showActionBar, keepLayout,autoDelay) {
 
     init {
         if (flags and SystemUiHelper.FLAG_LAYOUT_IN_SCREEN_OLDER_DEVICES != 0) {
@@ -23,18 +26,20 @@ class SystemUiHelperImplBelowHC(
         }
     }
 
-    override fun show() {
+    override fun disableInternal() {
         if (level > SystemUiHelper.LEVEL_LOW_PROFILE) {
+            //remove full screen
             activity.window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-            this.isShowing = true
         }
     }
 
-    override fun hide() {
-        if (level == 0) show()
-        else if (level > SystemUiHelper.LEVEL_LOW_PROFILE) {
+    override fun enableInternal() {
+        if (level <= SystemUiHelper.LEVEL_NORMAL) {
+            //remove full screen
+            activity.window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        } else if (level > SystemUiHelper.LEVEL_LOW_PROFILE) {
+            //make full screen
             activity.window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-            this.isShowing = false
         }
     }
 }

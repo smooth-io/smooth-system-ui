@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-package io.getsmooth.kt.android.system_ui
+package io.getsmooth.kt.android.system_ui.helper
 
 import android.annotation.TargetApi
 import android.app.Activity
 import android.os.Build
+import android.os.Handler
 import android.view.View
 
 @TargetApi(Build.VERSION_CODES.KITKAT)
-internal class SystemUiHelperImplKK(
+internal open class SystemUiHelperImplKK(
+    handler: Handler,
     activity: Activity,
     view: View,
     level: Int, flags: Int,
-    syncActionBar: Boolean,
-    keepLayout: Boolean
-) : SystemUiHelperImplJB(activity, view, level, flags, syncActionBar, keepLayout) {
+    showActionBar: Boolean,
+    keepLayout: Boolean,
+    autoDelay: Long
+) : SystemUiHelperImplJB(handler, activity, view, level, flags, showActionBar, keepLayout, autoDelay) {
 
 
-    override fun createHideFlags(): Int {
-        var flag = super.createHideFlags()
+    override fun createEnableFlags(): Int {
+        var flag = super.createEnableFlags()
 
         if (level == SystemUiHelper.LEVEL_IMMERSIVE) {
             // If the client requested immersive mode, and we're on Android 4.4

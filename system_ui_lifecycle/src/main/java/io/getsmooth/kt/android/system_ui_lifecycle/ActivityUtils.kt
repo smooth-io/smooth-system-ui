@@ -12,9 +12,9 @@ fun AppCompatActivity.normalAuto(
     delay: Long = 0,
     block: NormalMode.() -> Unit
 ): NormalMode =
-    normal(this, null,delay,block).let {
+    normal(this, null, -1, block).let {
         lifecycle.addObserver(
-            SystemUiLifecycleObserver(it)
+            SystemUiLifecycleObserver(it, delay)
         )
         it
     }
@@ -23,9 +23,9 @@ fun AppCompatActivity.normalAuto(
 fun AppCompatActivity.lowProfileAuto(
     delay: Long = 0,
     block: LowProfile.() -> Unit
-): LowProfile = lowProfile(this, null, delay, block).let {
+): LowProfile = lowProfile(this, null, -1, block).let {
     lifecycle.addObserver(
-        SystemUiLifecycleObserver(it)
+        SystemUiLifecycleObserver(it, delay)
     )
     it
 }
@@ -34,9 +34,9 @@ fun AppCompatActivity.lowProfileAuto(
 fun AppCompatActivity.fullScreenAuto(
     delay: Long = 0,
     block: FullScreen.() -> Unit
-): FullScreen = fullScreen(this, null, delay, block).let {
+): FullScreen = fullScreen(this, null, -1, block).let {
     lifecycle.addObserver(
-        SystemUiLifecycleObserver(it)
+        SystemUiLifecycleObserver(it, delay)
     )
     it
 }
@@ -45,9 +45,9 @@ fun AppCompatActivity.immersiveAuto(
     delay: Long = 0,
     block: ImmersiveMode.() -> Unit
 ): ImmersiveMode =
-    immersive(this, null, delay, block).let {
+    immersive(this, null, -1, block).let {
         lifecycle.addObserver(
-            SystemUiLifecycleObserver(it)
+            SystemUiLifecycleObserver(it, delay)
         )
         it
     }

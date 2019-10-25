@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.getsmooth.kt.android.system_ui
+package io.getsmooth.kt.android.system_ui.helper
 
 import android.app.Activity
 import android.os.Build
@@ -26,7 +26,7 @@ import android.view.WindowManager
 /**
  * Helper for controlling the visibility of the System UI across the various API levels. To use
  * this API, instantiate an instance of this class with the required level. The level specifies the
- * extent to which the System UI's visibility is changed when you call [.hide]
+ * extent to which the System UI's visibility is changed when you call [.enable]
  * or [.toggle].
  * @param activity The Activity who's system UI should be changed
  * @param level    The level of hiding. Should be either [.LEVEL_LOW_PROFILE],
@@ -37,122 +37,126 @@ import android.view.WindowManager
  * @param listener A listener which is called when the system visibility is changed
  */
 class SystemUiHelper(
-    activity: Activity,
+    val activity: Activity,
     view: View?,
-    level: Int, flags: Int,
-    syncActionBar: Boolean = true,
-    keepLayout: Boolean = false
+    level: Int,
+    flags: Int,
+    showActionBar: Boolean = false,
+    keepLayout: Boolean = false,
+    autoDelay: Long = 1000L
 ) {
 
-    private var listener: OnVisibilityChangeListener? = null
+    internal var statusBarIconsColor: StatusBarIconsColor = StatusBarIconsColor.NOT_SPECIFIED
         set(value) {
             field = value
-            impl.onVisibilityChangeListener = value
+            impl.statusBarIconsColor = value
         }
 
-    private val impl: SystemUiHelperImpl
+    internal var autoDelay: Long = autoDelay
+        set(value) {
+            field = value
+            impl.autoDelay = value
+        }
+
+    private val impl: SystemUiHelperBaseImpl
 
     private val handler: Handler = Handler(Looper.getMainLooper())
-    private val hideRunnable: Runnable
-
-
-    fun listener(listener: OnVisibilityChangeListener) {
-        this.listener = listener
-    }
-
-    fun removeListener() {
-        listener = null
-    }
-
-
-    /**
-     * @return true if the system UI is currently showing. What this means depends on the mode this
-     * [android.example.android.systemuivis.SystemUiHelper] was instantiated with.
-     */
-    val isShowing: Boolean
-        get() = impl.isShowing
 
     init {
 
         val myView = view ?: activity.window.decorView
 
-        hideRunnable = HideRunnable()
-
         // Create impl
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            impl = SystemUiHelperImplKK(activity, myView, level, flags, syncActionBar, keepLayout)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            impl = SystemUiHelperImplJB(activity, myView, level, flags, syncActionBar, keepLayout)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            impl = SystemUiHelperImplICS(activity, myView, level, flags, syncActionBar, keepLayout)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            impl = SystemUiHelperImplHC(activity, myView, level, flags, syncActionBar, keepLayout)
-        } else {
-            impl = SystemUiHelperImplBelowHC(activity, myView, level, flags, syncActionBar, keepLayout)
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> impl =
+                SystemUiHelperImplM(
+                    handler,
+                    activity,
+                    myView,
+                    level,
+                    flags,
+                    showActionBar,
+                    keepLayout,
+                    autoDelay
+                )
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT -> impl =
+                SystemUiHelperImplKK(
+                    handler,
+                    activity,
+                    myView,
+                    level,
+                    flags,
+                    showActionBar,
+                    keepLayout,
+                    autoDelay
+                )
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN -> impl =
+                SystemUiHelperImplJB(
+                    handler,
+                    activity,
+                    myView,
+                    level,
+                    flags,
+                    showActionBar,
+                    keepLayout,
+                    autoDelay
+                )
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH -> impl =
+                SystemUiHelperImplICS(
+                    handler,
+                    activity,
+                    myView,
+                    level,
+                    flags,
+                    showActionBar,
+                    keepLayout,
+                    autoDelay
+                )
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB -> impl =
+                SystemUiHelperImplHC(
+                    handler,
+                    activity,
+                    myView,
+                    level,
+                    flags,
+                    showActionBar,
+                    keepLayout,
+                    autoDelay
+                )
+            else -> impl =
+                SystemUiHelperImplBelowHC(
+                    handler,
+                    activity,
+                    myView,
+                    level,
+                    flags,
+                    showActionBar,
+                    keepLayout,
+                    autoDelay
+                )
         }
     }
 
-    /**
-     * Show the system UI. What this means depends on the mode this [android.example.android.systemuivis.SystemUiHelper] was
-     * instantiated with.
-     *
-     *
-     * Any currently queued delayed hide requests will be removed.
-     */
-    fun show() {
-        // Ensure that any currently queued hide calls are removed
-        removeQueuedRunnables()
-        impl.show()
+    fun disable(mills: Long = 0) {
+        impl.disable(mills)
     }
 
-    /**
-     * Hide the system UI. What this means depends on the mode this [android.example.android.systemuivis.SystemUiHelper] was
-     * instantiated with.
-     *
-     *
-     * Any currently queued delayed hide requests will be removed.
-     */
-    fun hide(mills: Long = 0) {
-        if (mills <= 0) hide()
-        else delayHide(mills)
+    fun enable(mills: Long = 0) {
+        impl.enable(mills)
     }
 
-    private fun hide() {
-        removeQueuedRunnables()
-        impl.hide()
+    fun release() {
+        impl.release()
     }
 
-    /**
-     * Request that the system UI is hidden after a delay.
-     *
-     *
-     * Any currently queued delayed hide requests will be removed.
-     *
-     * @param delayMillis The delay (in milliseconds) until the Runnable
-     * will be executed.
-     */
-    private fun delayHide(delayMillis: Long) {
-        // Ensure that any currently queued hide calls are removed
-        removeQueuedRunnables()
-
-        handler.postDelayed(hideRunnable, delayMillis)
+    fun listener(listener: OnVisibilityChangeListener) {
+        impl.listener(listener)
     }
 
-    /**
-     * Toggle whether the system UI is displayed.
-     */
-    fun toggle() {
-        if (impl.isShowing) {
-            impl.hide()
-        } else {
-            impl.show()
-        }
+    fun removeListener() {
+        impl.removeListener()
     }
 
-    private fun removeQueuedRunnables() {
-        // Ensure that any currently queued hide calls are removed
-        handler.removeCallbacks(hideRunnable)
-    }
 
     /**
      * A callback interface used to listen for system UI visibility changes.
@@ -161,17 +165,11 @@ class SystemUiHelper(
         /**
          * Called when the system UI visibility has changed.
          *
-         * @param visible True if the system UI is visible.
+         * @param systemUiVisible True if the system UI is systemUiVisible.
          */
-        fun onVisibilityChange(visible: Boolean)
+        fun onVisibilityChange(systemUiVisible: Boolean, isEnabled: Boolean)
     }
 
-
-    private inner class HideRunnable : Runnable {
-        override fun run() {
-            hide()
-        }
-    }
 
     companion object {
 
@@ -224,12 +222,10 @@ class SystemUiHelper(
          * Used with [.LEVEL_IMMERSIVE]. When this flag is set, an inward swipe in the system
          * bars areas will cause the system bars to temporarily appear in a semi-transparent state,
          * but no flags are cleared, and your system UI visibility change listeners are not triggered.
-         * The bars automatically hide again after a short delay, or if the user interacts with the
+         * The bars automatically enable again after a short delay, or if the user interacts with the
          * middle of the screen.
          */
         val FLAG_IMMERSIVE_STICKY = 0x2
-
-        private val LOG_TAG = SystemUiHelper::class.java.simpleName
     }
 
 }

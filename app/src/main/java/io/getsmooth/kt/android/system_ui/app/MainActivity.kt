@@ -15,36 +15,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        ViewCompat.setOnApplyWindowInsetsListener(
-            findViewById(R.id.container)
-        ) { view, insets ->
-            println("stable Insets : ${insets.stableInsetTop}")
-            println("system window Insets : ${insets.systemWindowInsetTop}")
-            println("has insets : ${insets.hasInsets()}")
-            println("has stable insets : ${insets.hasStableInsets()}")
-            println("has system window insets : ${insets.hasSystemWindowInsets()}")
-            println("----------------")
-
-            view.setPadding(
-                insets.systemWindowInsetLeft, insets.systemWindowInsetTop,
-                insets.systemWindowInsetRight, insets.systemWindowInsetBottom
-            )
-
-//            ViewCompat.onApplyWindowInsets(findViewById(R.id.container), insets)
-//            window.decorView.onApplyWindowInsets(insets)
-            insets.consumeSystemWindowInsets()
-        }
-
-        println("container : ${findViewById<ViewGroup>(R.id.container)}")
-        println(
-            "container 2: ${
-            (this.findViewById<View>(android.R.id.content) as ViewGroup).getChildAt(0) as ViewGroup
-            }"
-        )
 
         if (savedInstanceState == null) {
+            val f1 = Fragment1()
             supportFragmentManager.beginTransaction()
-                .replace(R.id.container, Fragment1())
+                .replace(R.id.container, f1)
                 .commit()
 
             Handler().postDelayed(Runnable {
@@ -52,7 +27,6 @@ class MainActivity : AppCompatActivity() {
                     .replace(R.id.container, Fragment2())
                     .commit()
             }, 5000)
-
 
             Handler().postDelayed(Runnable {
                 supportFragmentManager.beginTransaction()
@@ -74,15 +48,8 @@ class MainActivity : AppCompatActivity() {
                     .commit()
             }, 20000)
 
-
         }
 
-    }
-
-    fun View.setMarginTop(marginTop: Int) {
-        val menuLayoutParams = this.layoutParams as ViewGroup.MarginLayoutParams
-        menuLayoutParams.setMargins(0, marginTop, 0, 0)
-        this.layoutParams = menuLayoutParams
     }
 
 }

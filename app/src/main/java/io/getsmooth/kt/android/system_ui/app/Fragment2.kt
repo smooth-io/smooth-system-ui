@@ -32,14 +32,12 @@ class Fragment2 : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        //        activity?.apply {
-//            (this as AppCompatActivity).setSupportActionBar(toolbar)
-//        }
-        lowProfileAuto {
-            //            keepActionBar()
+                activity?.apply {
+            (this as AppCompatActivity).setSupportActionBar(toolbar)
+        }
+        normalAuto {
         }
     }
-
 
 
 }

@@ -8,9 +8,9 @@ fun Fragment.normalAuto(
     delay: Long = 0,
     block: NormalMode.() -> Unit
 ): NormalMode? = activity?.let {
-    normal(it, view, delay, block).let {
+    normal(it, view, -1, block).let {
         viewLifecycleOwner.lifecycle.addObserver(
-            SystemUiLifecycleObserver(it)
+            SystemUiLifecycleObserver(it,delay)
         )
         it
     }
@@ -24,11 +24,11 @@ fun Fragment.lowProfileAuto(
     lowProfile(
         it,
         view,
-        delay,
+        -1,
         block
     ).let {
         viewLifecycleOwner.lifecycle.addObserver(
-            SystemUiLifecycleObserver(it)
+            SystemUiLifecycleObserver(it,delay)
         )
         it
     }
@@ -42,11 +42,11 @@ fun Fragment.fullScreenAuto(
     fullScreen(
         it,
         view,
-        delay,
+        -1,
         block
     ).let {
         viewLifecycleOwner.lifecycle.addObserver(
-            SystemUiLifecycleObserver(it)
+            SystemUiLifecycleObserver(it,delay)
         )
         it
     }
@@ -59,11 +59,11 @@ fun Fragment.immersiveAuto(
     immersive(
         it,
         view,
-        delay,
+        -1,
         block
     ).let {
         viewLifecycleOwner.lifecycle.addObserver(
-            SystemUiLifecycleObserver(it)
+            SystemUiLifecycleObserver(it,delay)
         )
         it
     }

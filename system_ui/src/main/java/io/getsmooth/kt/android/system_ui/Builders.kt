@@ -2,20 +2,32 @@ package io.getsmooth.kt.android.system_ui
 
 import android.app.Activity
 import android.view.View
-import io.getsmooth.kt.android.system_ui.SystemUiHelper.Companion.LEVEL_IMMERSIVE
-import io.getsmooth.kt.android.system_ui.SystemUiHelper.Companion.LEVEL_NORMAL
+import io.getsmooth.kt.android.system_ui.helper.StatusBarIconsColor
+import io.getsmooth.kt.android.system_ui.helper.SystemUiHelper
+import io.getsmooth.kt.android.system_ui.helper.SystemUiHelper.Companion.LEVEL_NORMAL
+
 
 interface ScreenMode<T : ScreenMode<T>> {
 
     fun enable(delayMills: Long = 0): T
 
-    fun disable(): T
+    fun disable(delayMills: Long = 0): T
 
     fun build(): SystemUiHelper
 
-    fun listen(listener: SystemUiHelper.OnVisibilityChangeListener)
+    fun listen(listener: SystemUiHelper.OnVisibilityChangeListener): T
+
+    fun listen(block: (Boolean, Boolean) -> Unit): T
 
     fun removeListener(): T
+
+    fun release(): T
+
+    fun autoDelay(autoDelayMills: Long = 0): T
+
+    fun lightActionBar(): T
+
+    fun darkActionBar(): T
 
 }
 
@@ -27,12 +39,12 @@ abstract class BaseScreenMode<T : ScreenMode<T>>(
     private var systemUiHelper: SystemUiHelper? = null
 
     override fun enable(delayMills: Long): T {
-        build().hide(delayMills)
+        build().enable(delayMills)
         return instance()
     }
 
-    override fun disable(): T {
-        build().show()
+    override fun disable(delayMills: Long): T {
+        build().disable(delayMills)
         return instance()
     }
 
@@ -43,8 +55,18 @@ abstract class BaseScreenMode<T : ScreenMode<T>>(
         return systemUiHelper!!
     }
 
-    override fun listen(listener: SystemUiHelper.OnVisibilityChangeListener) {
+    override fun listen(listener: SystemUiHelper.OnVisibilityChangeListener): T {
         build().listener(listener)
+        return instance()
+    }
+
+    override fun listen(block: (Boolean, Boolean) -> Unit): T {
+        listen(object : SystemUiHelper.OnVisibilityChangeListener {
+            override fun onVisibilityChange(systemUiVisible: Boolean, isEnabled: Boolean) {
+                block(systemUiVisible, isEnabled)
+            }
+        })
+        return instance()
     }
 
     override fun removeListener(): T {
@@ -52,9 +74,29 @@ abstract class BaseScreenMode<T : ScreenMode<T>>(
         return instance()
     }
 
+    override fun release(): T {
+        build().release()
+        return instance()
+    }
+
     protected abstract fun instance(): T
 
     protected abstract fun buildInternal(): SystemUiHelper
+
+    override fun autoDelay(autoDelayMills: Long): T {
+        build().autoDelay = autoDelayMills
+        return instance()
+    }
+
+    override fun lightActionBar(): T {
+        build().statusBarIconsColor = StatusBarIconsColor.LIGHT
+        return instance()
+    }
+
+    override fun darkActionBar(): T {
+        build().statusBarIconsColor = StatusBarIconsColor.DARK
+        return instance()
+    }
 
 }
 
@@ -75,10 +117,10 @@ class NormalMode(activity: Activity, view: View?) : BaseScreenMode<NormalMode>(a
 
 class LowProfile(activity: Activity, view: View?) : BaseScreenMode<LowProfile>(activity, view) {
 
-    private var syncActionBar = true
+    private var showActionBar = false
 
-    fun keepActionBar(): LowProfile {
-        syncActionBar = false
+    fun showActionBar(): LowProfile {
+        showActionBar = true
         return this
     }
 
@@ -88,7 +130,7 @@ class LowProfile(activity: Activity, view: View?) : BaseScreenMode<LowProfile>(a
             view,
             SystemUiHelper.LEVEL_LOW_PROFILE,
             0,
-            syncActionBar
+            showActionBar
         )
 
     override fun instance(): LowProfile = this
@@ -99,10 +141,10 @@ class FullScreen(activity: Activity, view: View?) : BaseScreenMode<FullScreen>(a
 
     override fun instance(): FullScreen = this
 
-    private var syncActionBar = true
+    private var showActionBar = false
 
-    fun keepActionBar(): FullScreen {
-        syncActionBar = false
+    fun showActionBar(): FullScreen {
+        showActionBar = true
         return this
     }
 
@@ -113,12 +155,10 @@ class FullScreen(activity: Activity, view: View?) : BaseScreenMode<FullScreen>(a
     }
 
     private var hideNavBar = true
-
-    fun hideNavigationBar(): FullScreen {
-        hideNavBar = true
+    fun showNavigationBar(): FullScreen {
+        hideNavBar = false
         return this
     }
-
 
     override fun buildInternal(): SystemUiHelper =
         SystemUiHelper(
@@ -127,7 +167,7 @@ class FullScreen(activity: Activity, view: View?) : BaseScreenMode<FullScreen>(a
             if (hideNavBar) SystemUiHelper.LEVEL_LEAN_BACK
             else SystemUiHelper.LEVEL_HIDE_STATUS_BAR,
             0,
-            syncActionBar,
+            showActionBar,
             keepLayout
         )
 
@@ -139,10 +179,10 @@ class ImmersiveMode(activity: Activity, view: View?) : BaseScreenMode<ImmersiveM
 
     override fun instance(): ImmersiveMode = this
 
-    private var syncActionBar = true
+    private var showActionBar = false
 
-    fun keepActionBar(): ImmersiveMode {
-        syncActionBar = false
+    fun showActionBar(): ImmersiveMode {
+        showActionBar = true
         return this
     }
 
@@ -153,7 +193,6 @@ class ImmersiveMode(activity: Activity, view: View?) : BaseScreenMode<ImmersiveM
     }
 
     private var isSticky = false
-
     fun sticky(): ImmersiveMode {
         isSticky = true
         return this
@@ -167,7 +206,7 @@ class ImmersiveMode(activity: Activity, view: View?) : BaseScreenMode<ImmersiveM
             SystemUiHelper.LEVEL_IMMERSIVE,
             if (isSticky) SystemUiHelper.FLAG_IMMERSIVE_STICKY
             else 0,
-            syncActionBar,
+            showActionBar,
             keepLayout
         )
 
