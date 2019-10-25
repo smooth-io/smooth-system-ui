@@ -8,8 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import io.getsmooth.kt.android.system_ui.*
-import io.getsmooth.kt.android.system_ui_lifecycle.SystemUiLifecycleObserver
 import io.getsmooth.kt.android.system_ui_lifecycle.fullScreenAuto
+import io.getsmooth.kt.android.system_ui_lifecycle.immersiveAuto
 import io.getsmooth.kt.android.system_ui_lifecycle.normalAuto
 import kotlinx.android.synthetic.main.fragment_fragment1.*
 
@@ -27,21 +27,11 @@ class Fragment1 : Fragment() {
         return inflater.inflate(R.layout.fragment_fragment1, container, false)
     }
 
-    var fullScreenAuto: FullScreen? = null
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        activity?.apply {
-            (this as AppCompatActivity).setSupportActionBar(toolbar)
+        fullScreenAuto{
         }
-        println("View Created")
-        normalAuto {
-            lightActionBar()
-            autoDelay(3000)
-        }
-
     }
-
 
 
 }

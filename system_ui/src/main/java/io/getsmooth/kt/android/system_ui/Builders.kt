@@ -25,9 +25,9 @@ interface ScreenMode<T : ScreenMode<T>> {
 
     fun autoDelay(autoDelayMills: Long = 0): T
 
-    fun lightActionBar(): T
+    fun lightStatusBar(): T
 
-    fun darkActionBar(): T
+    fun darkStatusBar(): T
 
 }
 
@@ -88,12 +88,12 @@ abstract class BaseScreenMode<T : ScreenMode<T>>(
         return instance()
     }
 
-    override fun lightActionBar(): T {
+    override fun lightStatusBar(): T {
         build().statusBarIconsColor = StatusBarIconsColor.LIGHT
         return instance()
     }
 
-    override fun darkActionBar(): T {
+    override fun darkStatusBar(): T {
         build().statusBarIconsColor = StatusBarIconsColor.DARK
         return instance()
     }
