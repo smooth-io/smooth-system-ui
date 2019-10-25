@@ -12,13 +12,13 @@ and changes when the fragment or activity is dead and you need to revert the cha
 
 ##### Without lifecycle (__NOT RECOMMENED__) : 
 ```
-implementation "io.getsmooth.kt.android.system_ui:1.0.0" 
+implementation "io.getsmooth.kt.android:system_ui:1.0.0" 
 ```
 
 ##### With lifecycle (__RECOMMENED__) : 
 ```
-implementation "io.getsmooth.kt.android.system_ui:1.0.0" 
-implementation "io.getsmooth.kt.android.system_ui.lifecycle:1.0.0" 
+implementation "io.getsmooth.kt.android:system_ui:1.0.0" 
+implementation "io.getsmooth.kt.android:system_ui.lifecycle:1.0.0" 
 ```
 
 ## Usage
