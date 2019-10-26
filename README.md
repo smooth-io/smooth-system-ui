@@ -38,6 +38,7 @@ override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 override fun onStop() {
     super.onStop()
     fullScreen?.disable()
+    fullScreen?.release()
 }
 ```
 Example __with__ Auto: Requires lifecycle dependency
